@@ -1,0 +1,12 @@
+GLOBAL SOLUTION 2026/2 - CitizenTech
+Disciplina: Java Advanced
+Projeto: Conserta Aí - API Java (ocorrências, triagem com IA e autenticação JWT)
+
+Repositório GitHub: PREENCHER
+Vídeo pitch: PREENCHER
+
+Integrantes (RM - Nome completo - Turma):
+RM556649 - Matheus Arazin de Oliveira - 2TDSPV
+RM565597 - Artur Pioli Silva - 2TDSPV
+RM563454 - Kevin Martins Campos - 2TDSPV
+RM566058 - Pedro Gabriel Claes - 2TDSPV

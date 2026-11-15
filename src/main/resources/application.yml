@@ -1,0 +1,100 @@
+server:
+  port: ${PORT:8080}
+  error:
+    include-message: always
+
+spring:
+  application:
+    name: consertaai-api
+
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/consertaai}
+    username: ${DB_USERNAME:consertaai}
+    password: ${DB_PASSWORD:consertaai}
+
+  jpa:
+    # O schema e do Flyway; o Hibernate so confere se as entidades batem com ele.
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
+
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+
+  rabbitmq:
+    # URI completa. Local: docker-compose. Nuvem: CloudAMQP (amqps://...), o mesmo da API .NET.
+    addresses: ${RABBITMQ_URL:amqp://guest:guest@localhost:5672}
+    connection-timeout: 5s
+    listener:
+      simple:
+        default-requeue-rejected: false
+        retry:
+          enabled: true
+          max-attempts: 3
+          initial-interval: 2s
+          multiplier: 2
+          max-interval: 10s
+
+  ai:
+    # Spring AI com a API do ChatGPT (OpenAI). O DeepSeek usa o mesmo protocolo:
+    # basta trocar AI_BASE_URL e AI_MODEL (veja o README).
+    model:
+      chat: openai
+      embedding: none
+      image: none
+      audio:
+        speech: none
+        transcription: none
+      moderation: none
+    openai:
+      # Sem chave a aplicacao sobe normalmente e a triagem cai nas regras de fallback.
+      api-key: ${AI_API_KEY:sem-chave}
+      base-url: ${AI_BASE_URL:https://api.openai.com}
+      chat:
+        options:
+          model: ${AI_MODEL:gpt-4o-mini}
+          temperature: 0.1
+
+consertaai:
+  jwt:
+    # Mesmo segredo, emissor e audiencia da API .NET: o app usa um unico token nas duas.
+    secret: ${JWT_SECRET:desenvolvimento-local-troque-este-segredo-32+}
+    issuer: ${JWT_ISSUER:consertaai}
+    audience: ${JWT_AUDIENCE:consertaai-app}
+    expiracao-minutos: ${JWT_EXPIRACAO_MINUTOS:120}
+  ia:
+    habilitada: ${AI_HABILITADA:true}
+  rabbit:
+    exchange: consertaai.eventos
+    fila-apoios: consertaai.apoios
+    fila-triagem: consertaai.java.triagem
+    dead-letter-exchange: consertaai.eventos.dlx
+    fila-triagem-dlq: consertaai.java.triagem.dlq
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: never
+  health:
+    # A API continua atendendo com o broker fora do ar; a saude reflete o banco.
+    rabbit:
+      enabled: false
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    operations-sorter: method
+    tags-sorter: alpha
+
+logging:
+  level:
+    br.com.fiap.consertaai: INFO

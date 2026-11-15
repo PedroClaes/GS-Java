@@ -1,0 +1,25 @@
+# Ambiente local: PostgreSQL + RabbitMQ.
+#   docker compose up -d
+# Painel do RabbitMQ: http://localhost:15672 (guest / guest)
+services:
+  postgres:
+    image: postgres:16
+    container_name: consertaai-db
+    environment:
+      POSTGRES_DB: consertaai
+      POSTGRES_USER: consertaai
+      POSTGRES_PASSWORD: consertaai
+    ports:
+      - "5432:5432"
+    volumes:
+      - consertaai-data:/var/lib/postgresql/data
+
+  rabbitmq:
+    image: rabbitmq:3.13-management
+    container_name: consertaai-rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+
+volumes:
+  consertaai-data:
