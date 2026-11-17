@@ -158,7 +158,7 @@ Na primeira execução, o Flyway cria as tabelas (`V1`) e insere os dados de dem
 
 | Provedor | `AI_BASE_URL` | `AI_MODEL` | Custo |
 |---|---|---|---|
-| **Groq** (usado no deploy) | `https://api.groq.com/openai` | `llama-3.3-70b-versatile` | Gratuito, sem cartão (chave em console.groq.com) |
+| **Groq** (usado no deploy) | `https://api.groq.com/openai` | `openai/gpt-oss-120b` | Gratuito, sem cartão (chave em console.groq.com) |
 | ChatGPT (OpenAI) | `https://api.openai.com` (padrão) | `gpt-4o-mini` | Pago (platform.openai.com/api-keys) |
 | DeepSeek | `https://api.deepseek.com` | `deepseek-v4-flash` | Pago (platform.deepseek.com) |
 
@@ -166,11 +166,11 @@ Na primeira execução, o Flyway cria as tabelas (`V1`) e insere os dados de dem
 # Linux / macOS (no Windows PowerShell: $env:AI_API_KEY="...")
 export AI_API_KEY="gsk_..."
 export AI_BASE_URL="https://api.groq.com/openai"
-export AI_MODEL="llama-3.3-70b-versatile"
+export AI_MODEL="openai/gpt-oss-120b"
 ./mvnw spring-boot:run
 ```
 
-> Os nomes antigos do DeepSeek (`deepseek-chat` e `deepseek-reasoner`) foram aposentados em 24/07/2026; use `deepseek-v4-flash`.
+> Modelos são aposentados com frequência: o DeepSeek desligou `deepseek-chat` e `deepseek-reasoner` em 24/07/2026 (use `deepseek-v4-flash`), e a Groq desligou o `llama-3.3-70b-versatile` em 16/08/2026 (use `openai/gpt-oss-120b`). Como o modelo vem de variável de ambiente, a troca não exige mudar código.
 
 ### Variáveis de ambiente
 
@@ -296,7 +296,7 @@ A IA sugere a urgência e o risco, mas quem ordena a fila é essa conta. Ela é 
 | Prompt injection na descrição | As instruções de sistema mandam tratar o texto como dado. Chaves `{ }` do texto do usuário são neutralizadas |
 | Categoria escrita diferente ("iluminacao publica") | Comparação sem acento e sem caixa. Nome desconhecido cai em "Outros" |
 
-**Provedor:** o código usa o cliente do Spring AI compatível com OpenAI, como na aula 25 (ChatGPT e DeepSeek). O deploy usa a **Groq** (modelo Llama 3.3 70B), que fala o mesmo protocolo e tem plano gratuito. Trocar para ChatGPT ou DeepSeek é só mudar as variáveis `AI_BASE_URL` e `AI_MODEL`; nenhuma linha de código muda.
+**Provedor:** o código usa o cliente do Spring AI compatível com OpenAI, como na aula 25 (ChatGPT e DeepSeek). O deploy usa a **Groq** com o modelo `openai/gpt-oss-120b` (o modelo aberto da própria OpenAI), que fala o mesmo protocolo e tem plano gratuito. Trocar para ChatGPT ou DeepSeek é só mudar as variáveis `AI_BASE_URL` e `AI_MODEL`; nenhuma linha de código muda.
 
 **Versão do Spring AI:** o exemplo da aula usa a 0.8.1 (`OpenAiChatClient.call(texto)`). Este projeto usa a **1.0**, em que a API passou a ser o `ChatClient` fluente. Com ele vem a **saída estruturada**: `.entity(RespostaIa.class)` devolve um objeto Java, e não um texto livre que precisaria ser interpretado.
 
@@ -470,7 +470,7 @@ Os testes não precisam de PostgreSQL, RabbitMQ nem chave de IA.
 | `JWT_SECRET` | o mesmo segredo da API .NET |
 | `AI_API_KEY` | chave da IA (Groq: `gsk_...`) |
 | `AI_BASE_URL` | `https://api.groq.com/openai` |
-| `AI_MODEL` | `llama-3.3-70b-versatile` |
+| `AI_MODEL` | `openai/gpt-oss-120b` |
 
 5. Faça o deploy. No log devem aparecer `Migrating schema "public" to version "2 - seed dados demonstracao"` e `Started ConsertaAiApplication`.
 6. Na API .NET, defina `ApiJava__BaseUrl` com a URL do Render.
@@ -500,7 +500,7 @@ Os testes não precisam de PostgreSQL, RabbitMQ nem chave de IA.
 
 **Validação: `PREENCHER` pelo grupo.** Descrever o que foi revisado, executado e testado, por exemplo: compilação e testes locais, fluxo completo no Swagger, integração com a API .NET e com o app.
 
-**IA dentro do produto:** a triagem usa um LLM (Llama 3.3 na Groq; ChatGPT ou DeepSeek por configuração) via Spring AI. A sugestão da IA nunca decide sozinha:
+**IA dentro do produto:** a triagem usa um LLM (gpt-oss-120b na Groq; ChatGPT ou DeepSeek por configuração) via Spring AI. A sugestão da IA nunca decide sozinha:
 - a prioridade é uma conta auditável;
 - o gestor muda o status;
 - se a IA falhar, entram as regras de fallback.
