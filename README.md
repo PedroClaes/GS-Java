@@ -66,7 +66,7 @@ flowchart LR
     NET["API .NET<br/>apoios e comentários"]
     MQ{{"RabbitMQ<br/>exchange topic consertaai.eventos"}}
     PG[("PostgreSQL<br/>Flyway")]
-    LLM["LLM<br/>ChatGPT ou DeepSeek"]
+    LLM["LLM<br/>Groq · ChatGPT · DeepSeek"]
 
     APP -- "login" --> AUTH
     APP -- "Bearer JWT" --> OC
@@ -154,18 +154,23 @@ Na primeira execução, o Flyway cria as tabelas (`V1`) e insere os dados de dem
 | Saúde | <http://localhost:8080/actuator/health> |
 | Painel do RabbitMQ | <http://localhost:15672> (`guest` / `guest`) |
 
-**Sem chave de IA, a aplicação sobe normalmente.** A triagem usa as regras de fallback (`origemTriagem: "REGRAS"`). Para ligar a IA, defina antes de rodar:
+**Sem chave de IA, a aplicação sobe normalmente.** A triagem usa as regras de fallback (`origemTriagem: "REGRAS"`). Para ligar a IA, defina as variáveis do provedor antes de rodar:
 
-```powershell
-# ChatGPT (OpenAI)
-$env:AI_API_KEY="sk-..."
-$env:AI_MODEL="gpt-4o-mini"
+| Provedor | `AI_BASE_URL` | `AI_MODEL` | Custo |
+|---|---|---|---|
+| **Groq** (usado no deploy) | `https://api.groq.com/openai` | `llama-3.3-70b-versatile` | Gratuito, sem cartão (chave em console.groq.com) |
+| ChatGPT (OpenAI) | `https://api.openai.com` (padrão) | `gpt-4o-mini` | Pago (platform.openai.com/api-keys) |
+| DeepSeek | `https://api.deepseek.com` | `deepseek-v4-flash` | Pago (platform.deepseek.com) |
 
-# ou DeepSeek
-$env:AI_API_KEY="sk-..."
-$env:AI_BASE_URL="https://api.deepseek.com"
-$env:AI_MODEL="deepseek-chat"
+```bash
+# Linux / macOS (no Windows PowerShell: $env:AI_API_KEY="...")
+export AI_API_KEY="gsk_..."
+export AI_BASE_URL="https://api.groq.com/openai"
+export AI_MODEL="llama-3.3-70b-versatile"
+./mvnw spring-boot:run
 ```
+
+> Os nomes antigos do DeepSeek (`deepseek-chat` e `deepseek-reasoner`) foram aposentados em 24/07/2026; use `deepseek-v4-flash`.
 
 ### Variáveis de ambiente
 
@@ -177,7 +182,7 @@ Nenhum segredo está no repositório. O [`.env.example`](.env.example) lista tod
 | `RABBITMQ_URL` | `amqp://guest:guest@localhost:5672` | Broker (o mesmo da API .NET) |
 | `JWT_SECRET` | valor de desenvolvimento | Assinatura HS256, **igual à da API .NET**, com 32 ou mais caracteres |
 | `JWT_ISSUER` / `JWT_AUDIENCE` | `consertaai` / `consertaai-app` | Iguais aos da API .NET |
-| `AI_API_KEY` | vazio (usa as regras) | Chave do ChatGPT ou do DeepSeek |
+| `AI_API_KEY` | vazio (usa as regras) | Chave do Groq, do ChatGPT ou do DeepSeek |
 | `AI_BASE_URL` / `AI_MODEL` | `https://api.openai.com` / `gpt-4o-mini` | Provedor e modelo |
 
 ---
@@ -291,7 +296,11 @@ A IA sugere a urgência e o risco, mas quem ordena a fila é essa conta. Ela é 
 | Prompt injection na descrição | As instruções de sistema mandam tratar o texto como dado. Chaves `{ }` do texto do usuário são neutralizadas |
 | Categoria escrita diferente ("iluminacao publica") | Comparação sem acento e sem caixa. Nome desconhecido cai em "Outros" |
 
-**Provedor:** ChatGPT (OpenAI) por padrão e DeepSeek por configuração, como na aula 25. Os dois usam o mesmo protocolo, então trocar de um para o outro é só mudar as variáveis `AI_BASE_URL` e `AI_MODEL`.
+**Provedor:** o código usa o cliente do Spring AI compatível com OpenAI, como na aula 25 (ChatGPT e DeepSeek). O deploy usa a **Groq** (modelo Llama 3.3 70B), que fala o mesmo protocolo e tem plano gratuito. Trocar para ChatGPT ou DeepSeek é só mudar as variáveis `AI_BASE_URL` e `AI_MODEL`; nenhuma linha de código muda.
+
+**Versão do Spring AI:** o exemplo da aula usa a 0.8.1 (`OpenAiChatClient.call(texto)`). Este projeto usa a **1.0**, em que a API passou a ser o `ChatClient` fluente. Com ele vem a **saída estruturada**: `.entity(RespostaIa.class)` devolve um objeto Java, e não um texto livre que precisaria ser interpretado.
+
+**Retry:** `spring.ai.retry.max-attempts: 2`, seguindo o exemplo da aula. Num erro 429 (limite de uso) ou 5xx, o Spring AI tenta só mais uma vez e a triagem cai nas regras, em vez de ficar minutos esperando o provedor.
 
 ---
 
@@ -459,7 +468,9 @@ Os testes não precisam de PostgreSQL, RabbitMQ nem chave de IA.
 | `DB_USERNAME` / `DB_PASSWORD` | do banco |
 | `RABBITMQ_URL` | URL do CloudAMQP |
 | `JWT_SECRET` | o mesmo segredo da API .NET |
-| `AI_API_KEY` (+ `AI_BASE_URL` e `AI_MODEL` se for DeepSeek) | chave da IA |
+| `AI_API_KEY` | chave da IA (Groq: `gsk_...`) |
+| `AI_BASE_URL` | `https://api.groq.com/openai` |
+| `AI_MODEL` | `llama-3.3-70b-versatile` |
 
 5. Faça o deploy. No log devem aparecer `Migrating schema "public" to version "2 - seed dados demonstracao"` e `Started ConsertaAiApplication`.
 6. Na API .NET, defina `ApiJava__BaseUrl` com a URL do Render.
@@ -489,7 +500,7 @@ Os testes não precisam de PostgreSQL, RabbitMQ nem chave de IA.
 
 **Validação: `PREENCHER` pelo grupo.** Descrever o que foi revisado, executado e testado, por exemplo: compilação e testes locais, fluxo completo no Swagger, integração com a API .NET e com o app.
 
-**IA dentro do produto:** a triagem usa um LLM (ChatGPT ou DeepSeek) via Spring AI. A sugestão da IA nunca decide sozinha:
+**IA dentro do produto:** a triagem usa um LLM (Llama 3.3 na Groq; ChatGPT ou DeepSeek por configuração) via Spring AI. A sugestão da IA nunca decide sozinha:
 - a prioridade é uma conta auditável;
 - o gestor muda o status;
 - se a IA falhar, entram as regras de fallback.

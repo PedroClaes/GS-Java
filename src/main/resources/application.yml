@@ -41,8 +41,12 @@ spring:
           max-interval: 10s
 
   ai:
-    # Spring AI com a API do ChatGPT (OpenAI). O DeepSeek usa o mesmo protocolo:
-    # basta trocar AI_BASE_URL e AI_MODEL (veja o README).
+    # Spring AI com o cliente compativel com OpenAI. ChatGPT, DeepSeek e Groq usam o
+    # mesmo protocolo: basta trocar AI_BASE_URL e AI_MODEL (veja o README).
+    retry:
+      # Como no exemplo da aula: sem insistir minutos num provedor fora do ar ou no
+      # limite de uso. Se falhar, a triagem cai nas regras de fallback na hora.
+      max-attempts: 2
     model:
       chat: openai
       embedding: none
