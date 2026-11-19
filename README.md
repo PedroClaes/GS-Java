@@ -24,10 +24,10 @@ Esta API Java é o **núcleo do ecossistema**:
 
 | | |
 |---|---|
-| **Deploy (Render)** | `PREENCHER: https://consertaai-api-java.onrender.com` |
-| **Swagger** | `PREENCHER: <deploy>/swagger-ui.html` |
+| **Deploy (Render)** | `https://gs-java-5k10.onrender.com` |
+| **Swagger** | `https://gs-java-5k10.onrender.com/swagger-ui.html` |
 | **Vídeo pitch** | `PREENCHER: link do YouTube` |
-| **API .NET do grupo** | https://github.com/Mathzoba/consertaai-api-dotnet |
+| **API .NET do grupo** | https://consertaai-api-rm563454.azurewebsites.net/swagger/index.html |
 
 > No plano gratuito do Render, o serviço hiberna sem uso. **A primeira chamada pode levar cerca de 1 minuto.**
 
