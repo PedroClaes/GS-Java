@@ -2,8 +2,8 @@ GLOBAL SOLUTION 2026/2 - CitizenTech
 Disciplina: Java Advanced
 Projeto: Conserta Aí - API Java (ocorrências, triagem com IA e autenticação JWT)
 
-Repositório GitHub: PREENCHER
-Vídeo pitch: PREENCHER
+Repositório GitHub: https://github.com/PedroClaes/GS-Java.git
+Vídeo pitch: https://youtu.be/oeh9sTXGQek
 
 Integrantes (RM - Nome completo - Turma):
 RM556649 - Matheus Arazin de Oliveira - 2TDSPV
