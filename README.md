@@ -24,9 +24,9 @@ Esta API Java é o **núcleo do ecossistema**:
 
 | | |
 |---|---|
-| **Deploy (Render)** | `https://gs-java-5k10.onrender.com` |
-| **Swagger** | `https://gs-java-5k10.onrender.com/swagger-ui.html` |
-| **Vídeo pitch** | `https://youtu.be/oeh9sTXGQek` |
+| **Deploy (Render)** | https://gs-java-5k10.onrender.com |
+| **Swagger** | https://gs-java-5k10.onrender.com/swagger-ui.html |
+| **Vídeo pitch** | https://youtu.be/oeh9sTXGQek |
 | **API .NET do grupo** | https://consertaai-api-rm563454.azurewebsites.net/swagger/index.html |
 
 > No plano gratuito do Render, o serviço hiberna sem uso. **A primeira chamada pode levar cerca de 1 minuto.**
